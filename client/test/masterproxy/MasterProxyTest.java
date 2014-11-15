@@ -30,7 +30,7 @@ import static org.junit.Assert.assertTrue;
 
 public class MasterProxyTest {
 
-    private static final long FAKE_NETWORK_THRESHOLD = 100;
+    private static final long FAKE_NETWORK_THRESHOLD = 800;
     private static final Path JAR_PATH = Paths.get("commonio.jar");
     private static final Path OUTPUT_PATH = Paths.get("out.txt");
 
