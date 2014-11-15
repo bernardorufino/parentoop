@@ -10,7 +10,7 @@
     <orderEntry type="module" module-name="NetworkApi" />
     <orderEntry type="module" module-name="SqlLiteStorage" scope="RUNTIME" />
     <orderEntry type="module" module-name="Core" />
-    <orderEntry type="library" name="commons-collections" level="application" />
+    <orderEntry type="library" name="commons-collections-3.2" level="project" />
   </component>
 </module>
 

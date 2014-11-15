@@ -43,7 +43,7 @@ public class MasterMessageHandler implements MessageHandler{
     }
 
     protected void handleLoadJar(Message message, PeerCommunicator sender){
-        mPrintStream.println(message.getData());
+        mPrintStream.println((String) message.getData());
     }
 
     protected void handleFailure(Message message, PeerCommunicator sender){
