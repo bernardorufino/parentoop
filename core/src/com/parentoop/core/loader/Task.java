@@ -75,7 +75,7 @@ public class Task {
     public Reducer getReducer() {
         if (mReducer == null) {
             try {
-                mReducer = (Reducer) mJarLoader.loadClass(mDescriptor.getMapperClass()).newInstance();
+                mReducer = (Reducer) mJarLoader.loadClass(mDescriptor.getReducerClass()).newInstance();
             } catch (InstantiationException | IllegalAccessException e) {
                 e.printStackTrace();
             }
@@ -86,7 +86,7 @@ public class Task {
     public InputReader getInputReader() {
         if (mInputReader == null) {
             try {
-                mInputReader = (InputReader) mJarLoader.loadClass(mDescriptor.getMapperClass()).newInstance();
+                mInputReader = (InputReader) mJarLoader.loadClass(mDescriptor.getInputReaderClass()).newInstance();
             } catch (InstantiationException | IllegalAccessException e) {
                 e.printStackTrace();
             }
