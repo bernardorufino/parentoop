@@ -31,9 +31,11 @@ public class ReducingPhase extends ExecutionPhase<Path> {
 
     private Path mOutputFile;
     private PrintStream mOutputStream;
+    private int mTotalKeysToReduce;
 
     void setKeysToReduce(Set<String> keysToReduce) {
         mKeysToReduce = new HashSet<>(keysToReduce);
+        mTotalKeysToReduce = keysToReduce.size();
     }
 
     @Override
@@ -83,7 +85,7 @@ public class ReducingPhase extends ExecutionPhase<Path> {
                 mFinishedPeers.add(sender);
                 if (mFinishedPeers.containsAll(getParticipatingPeers())) {
                     if (!mKeysToReduce.isEmpty()) {
-                        failExecution(new IllegalStateException("Finished but not received all keys to be reduced."));
+                        failExecution(new IllegalStateException("Finished but not received all keys to be reduced.\n" + mKeysToReduce.size() + " / " + mTotalKeysToReduce + " remaining keys = " + mKeysToReduce));
                     } else {
                         // no need to close the stream here, it will be done on onExitPhase
                         succeedExecution(mOutputFile);
