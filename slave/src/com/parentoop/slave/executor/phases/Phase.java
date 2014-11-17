@@ -16,6 +16,8 @@ import java.util.Map;
 
 public abstract class Phase {
 
+    protected static final long INFINITY_TIME_OUT = 60 * 60 * 24 * 7; // In seconds
+
     private Class<? extends Phase> mNextPhaseClass;
     private Map<InetAddress, NodeClient> mPeers = new HashMap<>();
     protected PhaseExecutor mExecutor;

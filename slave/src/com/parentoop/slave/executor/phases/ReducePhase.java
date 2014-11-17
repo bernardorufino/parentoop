@@ -72,11 +72,21 @@ public class ReducePhase extends Phase {
                 }
                 mTotalRequests--;
                 if (mTotalRequests == 0) {
-                    mCollectorsThreadPool.shutdownNow();
-                    dispatchMessageToMaster(new Message(Messages.END_OF_RESULT_STREAM));
+                    endReduce();
                     nextPhase(LoadPhase.class);
-                    dispatchIdleMessage();
+                    // No need to report IDLE
+                    //dispatchIdleMessage();
                 }
+        }
+    }
+
+    private void endReduce() {
+        try {
+            mCollectorsThreadPool.shutdown();
+            mCollectorsThreadPool.awaitTermination(INFINITY_TIME_OUT, TimeUnit.SECONDS);
+            dispatchMessageToMaster(new Message(Messages.END_OF_RESULT_STREAM));
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
     }
 

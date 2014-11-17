@@ -20,7 +20,6 @@ import java.util.concurrent.TimeUnit;
 public class MapPhase extends Phase {
 
     private static final int MAP_THREADS = 5;
-    private static final long MAX_TIME_ALLOWED_IN_SECONDS = 60 * 60 * 24 * 7;
 
     private final ExecutorService mMappersThreadPool = Executors.newFixedThreadPool(MAP_THREADS);
     private NetworkDataPool mDataPool = new NetworkDataPool();
@@ -57,7 +56,7 @@ public class MapPhase extends Phase {
         try {
             mDataPool.close();
             mMappersThreadPool.shutdown();
-            mMappersThreadPool.awaitTermination(MAX_TIME_ALLOWED_IN_SECONDS, TimeUnit.SECONDS);
+            mMappersThreadPool.awaitTermination(INFINITY_TIME_OUT, TimeUnit.SECONDS);
             mDataPersistorThread.join();
         } catch (InterruptedException e) {
             e.printStackTrace();
