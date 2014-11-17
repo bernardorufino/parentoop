@@ -116,11 +116,11 @@ public class MasterApplication implements TaskExecution.TaskExecutionListener<Pa
         public void handle(Message message, PeerCommunicator sender) {
             switch (message.getCode()) {
                 case Messages.LOAD_JAR:
-                    debug("JAR file received from client.");
+                    debug("[C] JAR file received from client.");
                     mJarPath = message.getData();
                     break;
                 case Messages.LOAD_INPUT_PATH:
-                    debug("Input path received from client.");
+                    debug("[C] Input path received from client.");
                     mInputPath = new File(message.<String>getData()).toPath();
                     break;
                 case Messages.START_TASK:
@@ -153,12 +153,22 @@ public class MasterApplication implements TaskExecution.TaskExecutionListener<Pa
 
         @Override
         public void onPeerConnected(PeerCommunicator peer) {
-            System.out.println("Slave with IP " + peer.getAddress().getHostAddress() + " has just connected.");
+            try {
+                System.out.println("[S] Slave with IP " + peer.getAddress().getHostAddress() + " has just connected.");
+                mMasterClientServer.broadcastMessage(new Message(Messages.SLAVE_CONNECTED, peer.getAddress().getHostAddress()));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
 
         @Override
         public void onPeerDisconnected(PeerCommunicator peer) {
-            System.out.println("Slave with IP " + peer.getAddress().getHostAddress() + " has disconnected.");
+            try {
+                System.out.println("[S] Slave with IP " + peer.getAddress().getHostAddress() + " has disconnected.");
+                mMasterClientServer.broadcastMessage(new Message(Messages.SLAVE_DISCONNECTED, peer.getAddress().getHostAddress()));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -166,12 +176,19 @@ public class MasterApplication implements TaskExecution.TaskExecutionListener<Pa
 
         @Override
         public void onPeerConnected(PeerCommunicator peer) {
-            System.out.println("Client connected with IP " + peer.getAddress().getHostAddress());
+            for (PeerCommunicator slave : mMasterSlaveServer.getConnectedPeers()) {
+                try {
+                    mMasterClientServer.broadcastMessage(new Message(Messages.SLAVE_CONNECTED, slave.getAddress().getHostAddress()));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            System.out.println("[C] Client connected with IP " + peer.getAddress().getHostAddress());
         }
 
         @Override
         public void onPeerDisconnected(PeerCommunicator peer) {
-            System.out.println("Client disconnected with IP " + peer.getAddress().getHostAddress());
+            System.out.println("[C] Client disconnected with IP " + peer.getAddress().getHostAddress());
         }
     }
 }

@@ -137,9 +137,9 @@ public class TaskExecution<R> {
             mCurrentPhase = nextPhase;
 
             // debug
-            //String previous = (previousPhase != null) ? previousPhase.getClass().getSimpleName() : "-";
-            //String next = (nextPhase != null) ? nextPhase.getClass().getSimpleName() : "-";
-            //System.out.println(previous + " -> " + next);
+            String previous = (previousPhase != null) ? previousPhase.getClass().getSimpleName() : "-";
+            String next = (nextPhase != null) ? nextPhase.getClass().getSimpleName() : "-";
+            System.out.println(previous + " -> " + next);
 
             if (previousPhase != null) {
                 mSlaveMessageRouter.unregisterHandler(mMessageHandlerProxy);
@@ -166,7 +166,7 @@ public class TaskExecution<R> {
             final ExecutionPhase currentPhase = mCurrentPhase;
 
             // debug
-            //System.out.println("Message received: " + sender.getAddress() + " => " + message.getCode());
+            System.out.println("MASTER: " + message.getCode() + " <- " + sender.getAddress());
 
             if (currentPhase != null) {
                 mTaskExecutor.execute(new Runnable() {

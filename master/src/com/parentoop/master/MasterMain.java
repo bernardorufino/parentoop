@@ -22,7 +22,8 @@ public class MasterMain {
         System.out.println();
 
         while(true) {
-            System.out.print("Server running. Type 'q' to shutdown: ");
+            System.out.println("Server running. Press 'q' + <enter> to shutdown at any moment");
+            System.out.println();
             String in = inputScanner.nextLine();
             if (in.trim().equals("q")) break;
         }
