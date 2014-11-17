@@ -73,10 +73,13 @@ public class ReducePhase extends Phase {
                 mTotalRequests--;
                 if (mTotalRequests == 0) {
                     endReduce();
-                    nextPhase(LoadPhase.class);
-                    // No need to report IDLE
-                    //dispatchIdleMessage();
                 }
+                break;
+            case Messages.RESTART_SLAVE:
+                nextPhase(LoadPhase.class);
+                // No need to report IDLE
+                //dispatchIdleMessage();
+                break;
         }
     }
 
