@@ -117,9 +117,10 @@ public class MasterProxyTest {
             super(printStream, ClientPrompt.DEFAULT_OUTPUT_NAME);
         }
 
+        // TODO: Change this, test too coupled with impl
         @Override
         protected void handleLoadJar(Message message, PeerCommunicator sender) {
-            if(mReceivedMessage == null){
+            if (mReceivedMessage == null) {
                 mReceivedMessage = message;
                 mReceivedMessage = new Message(mReceivedMessage.getCode(), ((File) mReceivedMessage.getData()).toPath());
             } else {
@@ -132,21 +133,6 @@ public class MasterProxyTest {
                     assertTrue(((File) mReceivedMessage.getData()).exists());
                 }
             }
-        }
-
-        @Override
-        protected void handleFailure(Message message, PeerCommunicator sender) {
-            super.handleFailure(message, sender);    //To change body of overridden methods use File | Settings | File Templates.
-        }
-
-        @Override
-        protected void handleMapping(Message message, PeerCommunicator sender) {
-            super.handleMapping(message, sender);    //To change body of overridden methods use File | Settings | File Templates.
-        }
-
-        @Override
-        protected void handleReducing(Message message, PeerCommunicator sender) {
-            super.handleReducing(message, sender);    //To change body of overridden methods use File | Settings | File Templates.
         }
 
         @Override

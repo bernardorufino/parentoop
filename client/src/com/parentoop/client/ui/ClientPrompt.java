@@ -72,21 +72,24 @@ public class ClientPrompt {
 
         printStream.println("Sending " + mJarPath + " to " + mHostAddress + "...");
 
-        MasterProxy masterProxy = new MasterProxy(mHostAddress, new MasterMessageHandler(printStream, mOutputName));
+        printStream.println("Press <enter> at any moment to start the task\n");
+
+        MasterMessageHandler messageHandler = new MasterMessageHandler(printStream, mOutputName);
+        MasterProxy masterProxy = new MasterProxy(mHostAddress, messageHandler);
+        messageHandler.setProxy(masterProxy);
         masterProxy.sendFile(Messages.LOAD_JAR, mJarPath);
 
         masterProxy.dispatchMessage(Messages.LOAD_INPUT_PATH, mInputPath.toString());
 
-        printStream.print("Type \"run\" to start the task: ");
+        // <enter> to start the task
+        scanner.nextLine();
 
-        while(!scanner.next().equals(START_TASK_COMMAND)){
-            printStream.println("Invalid command, please try again.");
-        }
         masterProxy.dispatchMessage(Messages.START_TASK, mTaskConfiguratorName);
 
-        printStream.println("Task started!");
+        printStream.println("-- Task started!");
 
-        printStream.close();
+        // Don't close printStream because there are threads still running that might want to print
+        //printStream.close();
         scanner.close();
     }
 
