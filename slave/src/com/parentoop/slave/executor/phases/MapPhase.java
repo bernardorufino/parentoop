@@ -8,6 +8,7 @@ import com.parentoop.network.api.Message;
 import com.parentoop.network.api.PeerCommunicator;
 import com.parentoop.slave.api.SlaveStorage;
 import com.parentoop.slave.executor.TaskParameters;
+import com.parentoop.slave.view.Console;
 
 import java.io.Serializable;
 import java.util.HashSet;
@@ -33,6 +34,7 @@ public class MapPhase extends Phase {
         super.initialize(parameters);
         mMapper = parameters.getMapper();
         mStorage = parameters.getStorage();
+        dispatchIdleMessage();
     }
 
     @Override
@@ -42,7 +44,6 @@ public class MapPhase extends Phase {
                 if (mDataPersistorThread == null) startDataPersistor();
                 Runnable task = new MapTask(message.<Serializable>getData());
                 mMappersThreadPool.submit(task);
-                dispatchIdleMessage();
                 break;
             case Messages.END_MAP:
                 endMap();
@@ -54,9 +55,9 @@ public class MapPhase extends Phase {
 
     private void endMap() {
         try {
+            mDataPool.close();
             mMappersThreadPool.shutdown();
             mMappersThreadPool.awaitTermination(MAX_TIME_ALLOWED_IN_SECONDS, TimeUnit.SECONDS);
-            mDataPool.close();
             mDataPersistorThread.join();
         } catch (InterruptedException e) {
             e.printStackTrace();
@@ -75,6 +76,7 @@ public class MapPhase extends Phase {
         public void run() {
             //noinspection unchecked
             mMapper.map(mChunk, mDataPool);
+            dispatchIdleMessage();
         }
     }
 
@@ -90,6 +92,7 @@ public class MapPhase extends Phase {
                     //noinspection unchecked
                     mStorage.insert(key, datum.getValue());
                 }
+                Console.println("MapPhase: DataPersistor finished");
             }
         });
         mDataPersistorThread.start();
