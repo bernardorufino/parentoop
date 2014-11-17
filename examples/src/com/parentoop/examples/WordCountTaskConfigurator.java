@@ -2,6 +2,9 @@ package com.parentoop.examples;
 
 import com.parentoop.core.loader.TaskConfigurator;
 import com.parentoop.core.loader.TaskDescriptor;
+import com.parentoop.examples.LineChunksInputReader;
+import com.parentoop.examples.WordCountReducer;
+import com.parentoop.examples.WordCounterMapper;
 
 public class WordCountTaskConfigurator implements TaskConfigurator {
 

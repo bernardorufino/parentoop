@@ -10,6 +10,7 @@ import java.io.PrintStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 
 public class MasterMessageHandler implements MessageHandler{
 
@@ -18,6 +19,7 @@ public class MasterMessageHandler implements MessageHandler{
 
     public MasterMessageHandler(PrintStream printStream, String outputName) {
         mPrintStream = printStream;
+        mOutputName = outputName;
     }
 
     @Override
@@ -64,7 +66,7 @@ public class MasterMessageHandler implements MessageHandler{
         mPrintStream.println("Task finished. Writing" + mOutputName + "to local directory.");
         Path receivedResult = message.getData();
         try {
-            Files.copy(receivedResult, Paths.get("/result"));
+            Files.copy(receivedResult, Paths.get(mOutputName).toAbsolutePath(), StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException e) {
             e.printStackTrace();
         }
