@@ -14,6 +14,7 @@ public abstract class PeerCommunicator {
     public static final byte MESSAGE_HEADER = 3;
     public static final byte FILE_HEADER = 4;
     public static final byte DISCONNECT_HEADER = 127;
+    private final ScheduledExecutorService mExecutorService;
 
     protected Socket mSocket;
     private ObjectInputStream mInputStream;
@@ -27,6 +28,7 @@ public abstract class PeerCommunicator {
         mOutputStream = new ObjectOutputStream(new BufferedOutputStream(socket.getOutputStream()));
         mOutputStream.flush();
         mInputStream = new CustomObjectInputStream(new BufferedInputStream(socket.getInputStream()));
+        mExecutorService = executorService;
 
         mReadTaskFuture = executorService.scheduleWithFixedDelay(new ReadRunnable(), 0, 100, TimeUnit.NANOSECONDS);
     }
@@ -65,6 +67,7 @@ public abstract class PeerCommunicator {
              Socket socket = mSocket) {
             os.write(DISCONNECT_HEADER);
             os.flush();
+            mExecutorService.shutdownNow();
         } catch (IOException ex) {
             // eat exception, we are closing anyway
         }
