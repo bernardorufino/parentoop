@@ -136,6 +136,11 @@ public class TaskExecution<R> {
             ExecutionPhase<R> previousPhase = mCurrentPhase;
             mCurrentPhase = nextPhase;
 
+            // debug
+            //String previous = (previousPhase != null) ? previousPhase.getClass().getSimpleName() : "-";
+            //String next = (nextPhase != null) ? nextPhase.getClass().getSimpleName() : "-";
+            //System.out.println(previous + " -> " + next);
+
             if (previousPhase != null) {
                 mSlaveMessageRouter.unregisterHandler(mMessageHandlerProxy);
                 previousPhase.onExitPhase(mCurrentPhase);
@@ -159,6 +164,10 @@ public class TaskExecution<R> {
         @Override
         public void handle(final Message message, final PeerCommunicator sender) {
             final ExecutionPhase currentPhase = mCurrentPhase;
+
+            // debug
+            //System.out.println("Message received: " + sender.getAddress() + " => " + message.getCode());
+
             if (currentPhase != null) {
                 mTaskExecutor.execute(new Runnable() {
                     @Override
