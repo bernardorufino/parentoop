@@ -48,7 +48,8 @@ public class MappingPhase extends ExecutionPhase<Path> {
     public void onEnterPhase(ExecutionPhase previousPhase) {
         int chunkSenderThreads = Math.min(MAX_POOL_SIZE, Math.max(getParticipatingPeers().size() / 2, 1));
         mExecutorService = Executors.newFixedThreadPool(chunkSenderThreads + 1); // +1 for the input reader one
-        mIdlePeers = new LinkedBlockingQueue<>();
+
+        mIdlePeers = new LinkedBlockingQueue<>(getParticipatingPeers());
         mFoundKeys = Sets.newConcurrentHashSet();
 
         final DataPool<Serializable> inputDataPool = new DataPool<>();
@@ -116,9 +117,22 @@ public class MappingPhase extends ExecutionPhase<Path> {
             } finally {
                 int active = mActiveChunkSendingThreads.decrementAndGet();
                 if (active == 0) {
+                    waitAllPeers();
+                    while (!mIdlePeers.isEmpty()) {
+                        PeerCommunicator peer = mIdlePeers.take();
+                        // Can send right after MAP_CHUNK, because slave await map task
+                        peer.dispatchMessage(new Message(Messages.END_MAP));
+                    }
+                    waitAllPeers();
                     goToNextPhase();
                 }
             }
         }
     }
+
+    private void waitAllPeers() {
+        // TODO: Put timeout if someone does not answer in time
+        while (mIdlePeers.size() < getParticipatingPeers().size());
+    }
+
 }
