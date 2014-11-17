@@ -46,7 +46,7 @@ public class MappingPhase extends ExecutionPhase<Path> {
 
     @Override
     public void onEnterPhase(ExecutionPhase previousPhase) {
-        int chunkSenderThreads = Math.min(MAX_POOL_SIZE, getParticipatingPeers().size() / 2);
+        int chunkSenderThreads = Math.min(MAX_POOL_SIZE, Math.max(getParticipatingPeers().size() / 2, 1));
         mExecutorService = Executors.newFixedThreadPool(chunkSenderThreads + 1); // +1 for the input reader one
         mIdlePeers = new LinkedBlockingQueue<>();
         mFoundKeys = Sets.newConcurrentHashSet();
