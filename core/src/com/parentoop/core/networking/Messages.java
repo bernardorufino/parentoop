@@ -35,6 +35,7 @@ public class Messages {
     public static final int REDUCING = 1004;                // Master-client
     public static final int COLLECTING = 1005;              // Master-client
     public static final int SLAVE_CONNECTED = 1006;         // Master-client
+    public static final int SLAVE_DISCONNECTED = 1007;      // Master-client
 
 
     // Prevents instantiation
