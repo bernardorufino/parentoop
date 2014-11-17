@@ -28,12 +28,13 @@ public class Messages {
     public static final int END_OF_RESULT_STREAM = 302;     // slave-Master
     public static final int SEND_RESULT = 303;              // Master-client
 
-    // State
+    // Control
     public static final int IDLE = 1001;                    // slave-Master
     public static final int SETTING_UP = 1002;              // Master-client
     public static final int MAPPING = 1003;                 // Master-client
     public static final int REDUCING = 1004;                // Master-client
     public static final int COLLECTING = 1005;              // Master-client
+    public static final int SLAVE_CONNECTED = 1006;         // Master-client
 
 
     // Prevents instantiation
