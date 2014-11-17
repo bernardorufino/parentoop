@@ -17,6 +17,8 @@ public class LineChunksInputReader implements InputReader {
             Scanner scanner = new Scanner(Files.newInputStream(file));
             while (scanner.hasNext()) {
                 String line = scanner.nextLine();
+                // Prevent useless network consumption
+                if (line.trim().isEmpty()) continue;
                 chunkYielder.yield(line);
             }
         } catch (IOException e) {
