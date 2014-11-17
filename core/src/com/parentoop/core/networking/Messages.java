@@ -26,7 +26,8 @@ public class Messages {
     // Finalization
     public static final int RESULT_PAIR = 301;              // slave-Master
     public static final int END_OF_RESULT_STREAM = 302;     // slave-Master
-    public static final int SEND_RESULT = 303;              // Master-client
+    public static final int RESTART_SLAVE = 303;            // Master-slave
+    public static final int SEND_RESULT = 304;              // Master-client
 
     // Control
     public static final int IDLE = 1001;                    // slave-Master

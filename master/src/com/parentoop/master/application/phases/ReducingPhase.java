@@ -78,13 +78,14 @@ public class ReducingPhase extends ExecutionPhase<Path> {
         switch (message.getCode()) {
             case Messages.RESULT_PAIR:
                 Datum datum = message.getData();
-                mOutputStream.println(datum.getKey() + " : " + datum.getValue());
+                mOutputStream.println(datum.getKey() + ": " + datum.getValue());
                 mOutputStream.flush();
                 mKeysToReduce.remove(datum.getKey());
                 break;
             case Messages.END_OF_RESULT_STREAM:
                 mFinishedPeers.add(sender);
                 if (mFinishedPeers.containsAll(getParticipatingPeers())) {
+                    sendRestartMessageToSlaves();
                     if (!mKeysToReduce.isEmpty()) {
                         failExecution(new IllegalStateException("Finished but not received all keys to be reduced.\n" + mKeysToReduce.size() + " / " + mTotalKeysToReduce + " remaining keys = " + mKeysToReduce));
                     } else {
@@ -93,6 +94,16 @@ public class ReducingPhase extends ExecutionPhase<Path> {
                     }
                 }
                 break;
+        }
+    }
+
+    private void sendRestartMessageToSlaves() {
+        for (PeerCommunicator slave : getParticipatingPeers()) {
+            try {
+                slave.dispatchMessage(new Message(Messages.RESTART_SLAVE));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 
