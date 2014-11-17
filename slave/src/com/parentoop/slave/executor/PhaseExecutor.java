@@ -33,6 +33,7 @@ public class PhaseExecutor implements MessageHandler {
         mTaskParameters.setMasterConnection(mMasterConnection);
         Console.println("Setting Slave connection as server");
         NodeServer slaveConnection = new NodeServer(Ports.SLAVE_SLAVE_PORT, this);
+        slaveConnection.startServer();
         mTaskParameters.setSlaveConnection(slaveConnection);
         mPhase = new LoadPhase();
         mPhase.initialize(mTaskParameters);
@@ -40,15 +41,14 @@ public class PhaseExecutor implements MessageHandler {
 
     @Override
     public void handle(Message message, PeerCommunicator sender) {
-        Console.println("Incomming message: " + message.getCode());
-        Console.println("In phase: " + mPhase.getClass().getSimpleName());
+        Console.println("SLAVE: " + message.getCode() + " <- " + sender.getAddress());
         mPhase.execute(message, sender);
         Phase phase = mPhase.nextPhase();
         if (!phase.equals(mPhase)) {
             mPhase.terminate(mTaskParameters);
             mPhase = phase;
             mPhase.initialize(mTaskParameters);
-            Console.println("Next phase: " + phase.getClass().getSimpleName());
+            Console.println("===========[ " + phase.getClass().getSimpleName() + " ]===========");
         }
     }
 }

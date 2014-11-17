@@ -9,7 +9,6 @@ import com.parentoop.network.api.PeerCommunicator;
 import com.parentoop.slave.api.SlaveStorage;
 import com.parentoop.slave.executor.TaskParameters;
 
-import java.io.IOException;
 import java.io.Serializable;
 import java.net.InetAddress;
 import java.util.*;
@@ -18,6 +17,7 @@ import java.util.concurrent.*;
 public class ReducePhase extends Phase {
 
     private final ExecutorService mReducersThreadPool = Executors.newCachedThreadPool();
+    private final ExecutorService mCollectorsThreadPool = Executors.newCachedThreadPool();
     private final ExecutorService mValueSendersThreadPool = Executors.newCachedThreadPool();
 
     private SlaveStorage<Serializable> mStorage;
@@ -66,9 +66,13 @@ public class ReducePhase extends Phase {
                 String key = message.getData();
                 int n = mRequests.get(key) - 1;
                 mRequests.put(key, n);
-                if (n == 0) collect(key);
+                if (n == 0) {
+                    mValues.get(key).close();
+                    mCollectorsThreadPool.submit(new CollectResultTask(key));
+                }
                 mTotalRequests--;
                 if (mTotalRequests == 0) {
+                    mCollectorsThreadPool.shutdownNow();
                     dispatchMessageToMaster(new Message(Messages.END_OF_RESULT_STREAM));
                     nextPhase(LoadPhase.class);
                     dispatchIdleMessage();
@@ -95,16 +99,6 @@ public class ReducePhase extends Phase {
         }
     }
 
-    public void collect(String key) {
-        Future<Serializable> future = mResults.get(key);
-        try {
-            Datum datum = new Datum(key, future.get());
-            dispatchMessageToMaster(new Message(Messages.RESULT_PAIR, datum));
-        } catch (InterruptedException | ExecutionException e) {
-            e.printStackTrace();
-        }
-    }
-
     private class ReduceTask implements Callable<Serializable> {
 
         private final String mKey;
@@ -125,21 +119,37 @@ public class ReducePhase extends Phase {
     private class ValueSender implements Runnable {
 
         private final String mKey;
-        private final PeerCommunicator mDestination;
+        private final PeerCommunicator mRequester;
 
-        private ValueSender(PeerCommunicator destination, String key) {
-            mDestination = destination;
+        private ValueSender(PeerCommunicator requester, String key) {
+            mRequester = requester;
             mKey = key;
         }
 
         @Override
         public void run() {
+            for (Serializable value : mStorage.read(mKey)) {
+                respondToSlave(mRequester, new Message(Messages.KEY_VALUE, new Datum(mKey, value)));
+            }
+            respondToSlave(mRequester, new Message(Messages.END_OF_DATA_STREAM, mKey));
+        }
+    }
+
+    private class CollectResultTask implements Runnable {
+
+        private final String mKey;
+
+        public CollectResultTask(String key) {
+            mKey = key;
+        }
+
+        @Override
+        public void run() {
+            Future<Serializable> future = mResults.get(mKey);
             try {
-                for (Serializable value : mStorage.read(mKey)) {
-                    mDestination.dispatchMessage(new Message(Messages.KEY_VALUE, new Datum(mKey, value)));
-                }
-                mDestination.dispatchMessage(new Message(Messages.END_OF_DATA_STREAM, mKey));
-            } catch (IOException e) {
+                Datum datum = new Datum(mKey, future.get());
+                dispatchMessageToMaster(new Message(Messages.RESULT_PAIR, datum));
+            } catch (InterruptedException | ExecutionException e) {
                 e.printStackTrace();
             }
         }

@@ -39,8 +39,7 @@ public abstract class Phase {
     public Phase nextPhase() {
         if (mNextPhaseClass.equals(getClass())) return this;
         try {
-            Phase phase = mNextPhaseClass.newInstance();
-            return phase;
+            return mNextPhaseClass.newInstance();
         } catch (InstantiationException | IllegalAccessException e) {
             e.printStackTrace();
             return null;
@@ -53,6 +52,7 @@ public abstract class Phase {
 
     protected void dispatchMessageToSlave(InetAddress slaveAddress, Message message) {
         try {
+            Console.println("-> " + message.getCode());
             NodeClient nodeClient = mPeers.get(slaveAddress);
             if (nodeClient == null) {
                 nodeClient = new NodeClient(slaveAddress, Ports.SLAVE_SLAVE_PORT, mExecutor);
@@ -64,8 +64,19 @@ public abstract class Phase {
         }
     }
 
+    protected void respondToSlave(PeerCommunicator slave, Message message) {
+        try {
+            Console.println(message.getCode() + " -> SLAVE");
+            slave.dispatchMessage(message);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
+
     protected void dispatchMessageToMaster(Message message) {
         try {
+            Console.println(message.getCode() + " -> MASTER");
             mMasterConnection.dispatchMessage(message);
         } catch (IOException e) {
             e.printStackTrace();
@@ -83,7 +94,7 @@ public abstract class Phase {
     }
 
     public void dispatchIdleMessage() {
-        Console.println("Dispatching IDLE to Master");
+        Console.println("IDLE -> Master");
         try {
             mMasterConnection.dispatchMessage(new Message(Messages.IDLE));
         } catch (IOException e) {
